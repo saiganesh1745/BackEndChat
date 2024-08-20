@@ -29,7 +29,7 @@ const port = process.env.PORT || 4005;
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000", // Adjust to your frontend origin
+    origin: "https://frontendchat-uh98.onrender.com", // Adjust to your frontend origin
     methods: ["GET", "POST"]
   }
 });
