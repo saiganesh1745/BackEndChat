@@ -5,6 +5,7 @@ require('dotenv').config();
 const http = require("http");
 const { Server } = require("socket.io");
 const User = require('./models/Users'); // Import your User model
+const Chats = require('./models/Chats'); // Import your Chats model
 
 // Connect to MongoDB
 const dburl = process.env.mongodburl;
@@ -29,7 +30,8 @@ const port = process.env.PORT || 4005;
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "https://frontendchat-uh98.onrender.com", // Adjust to your frontend origin
+    // origin: "http://localhost:3000", // Adjust to your frontend origin
+    origin: "https://chatwebvk.onrender.com", // Adjust to your frontend origin
     methods: ["GET", "POST"]
   }
 });
@@ -52,6 +54,14 @@ io.on("connection", (socket) => {
     console.log("New user online:", username);
   });
 
+  socket.on('startTyping', ({ networkId, userId }) => {
+    socket.broadcast.to(networkId).emit('userTyping', { userId });
+  });
+  
+  socket.on('stopTyping', ({ networkId, userId }) => {
+    socket.broadcast.to(networkId).emit('userStoppedTyping', { userId });
+  });
+
   // Handle user disconnecting
   socket.on("disconnect", async () => {
     const username = activeUsers[socket.id];
@@ -68,6 +78,27 @@ io.on("connection", (socket) => {
     const onlineUsers = await User.find({ online: true }).select('username');
     io.emit("activeUsers", onlineUsers.map(user => user.username));
     console.log("User disconnected:", socket.id, username);
+  });
+
+  // Handle message edits
+  socket.on("editMessage", async (messageData) => {
+    try {
+      const { _id, newMsg } = messageData;
+      await Chats.updateOne({ _id, deleted: false }, { $set: { msg: newMsg } });
+      io.emit("messageUpdated", { _id, newMsg });
+    } catch (error) {
+      console.error("Error editing message:", error);
+    }
+  });
+
+  // Handle message deletions
+  socket.on("deleteMessage", async (messageId) => {
+    try {
+      await Chats.updateOne({ _id: messageId, deleted: false }, { $set: { deleted: true } });
+      io.emit("messageDeleted", messageId);
+    } catch (error) {
+      console.error("Error deleting message:", error);
+    }
   });
 });
 

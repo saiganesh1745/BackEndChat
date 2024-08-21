@@ -5,15 +5,22 @@ const userrouter = express.Router();
 
 userrouter.post("/checkuserlogin", usercontroller.checkuserlogin);
 userrouter.post("/insertuser", usercontroller.insertuser);
-userrouter.get("/searchuser/:searchTerm", usercontroller.searchuser);
+
 userrouter.put("/updateuserdata", usercontroller.updateuserdata);
+userrouter.get("/searchuser/:searchTerm", usercontroller.searchuser);
+
 userrouter.post("/searchconnection", usercontroller.searchconnection);
 userrouter.post("/sendmessage", usercontroller.sendmessage);
+
 userrouter.get("/viewchat/:networkId", usercontroller.viewchat);
-userrouter.post("/updateseen/:_i", usercontroller.updateseen);
 userrouter.get("/connections/:searchTerm", usercontroller.connections);
 
 // Route to get all online users
-userrouter.get('/users/status', usercontroller.getOnlineUsers);
+userrouter.get("/users/status", usercontroller.getOnlineUsers);
+userrouter.put("/updateseen/:_id", usercontroller.updateseen);
+userrouter.get("/unreadmessages/:contactId", usercontroller.getUnreadMessages);
+
+userrouter.put('/editmessage', usercontroller.editmessage);
+userrouter.delete('/deletemessage/:_id', usercontroller.deletemessage);
 
 module.exports = userrouter;

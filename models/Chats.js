@@ -3,6 +3,12 @@ const moment = require('moment-timezone');
 
 
 const chatsschema = new mongoose.Schema({
+    msgid:{
+        type: Number,
+        required: true,
+        unique: true,
+        default: () => generateRandomId()
+    },
     networkid: {
       type: String,
       required: true,
@@ -21,10 +27,14 @@ const chatsschema = new mongoose.Schema({
     },
     read: {
         type: Boolean,
-        default: false // Default value for read field
+        default: false // Default value for read fiaeld
     }
 
   });
+
+  function generateRandomId() {
+    return Math.floor(Math.random() * 900000) + 100000;
+}
 
   const Chats = mongoose.model('Chats',chatsschema);
 

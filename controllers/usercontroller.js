@@ -35,23 +35,23 @@ const updateuserdata = async (request, response) => {
     const user = await Users.findOne({ userid });
 
     if (!user) {
-      return response.status(404).send("User not found with the provided userid");
+      return response
+        .status(404)
+        .send("User not found with the provided userid");
     }
 
     for (const key in input) {
-      if (key !== 'userid' && input[key]) {
+      if (key !== "userid" && input[key]) {
         user[key] = input[key];
       }
     }
 
     await user.save();
     response.status(200).send("User Data Updated Successfully");
-
   } catch (e) {
     response.status(500).send(e.message);
   }
 };
-
 
 // Controller to handle when a user goes offline and update last seen
 const markUserOffline = async (username) => {
@@ -66,8 +66,6 @@ const markUserOffline = async (username) => {
     console.error(`Error marking user ${username} offline:`, error);
   }
 };
-
-
 
 const connections = async (request, response) => {
   try {
@@ -201,12 +199,67 @@ const updateseen = async (req, res) => {
   }
 };
 
+
 const getOnlineUsers = async (req, res) => {
   try {
     const onlineUsers = await Users.find({ online: true }).select("username");
     res.json(onlineUsers.map((user) => user.username));
   } catch (error) {
     res.status(500).send(error.message);
+  }
+};
+
+const editmessage = async (request, response) => {
+  try {
+    const { _id, msg } = request.body; // Get message ID and new message text from request body
+
+    const msgToUpdate = await Chats.findById(_id);
+    
+    if (!msgToUpdate) {
+      return response.status(404).send("Message not found with the provided id");
+    }
+
+    msgToUpdate.msg = msg; // Update the message text
+
+    await msgToUpdate.save();
+    response.status(200).send("Message updated successfully");
+  } catch (e) {
+    response.status(500).send(e.message);
+  }
+};
+
+const getUnreadMessages = async (req, res) => {
+  try {
+    const contactId = req.params.contactId;
+    const myUserId = req.user._id; // Assume you're getting the logged-in user's ID from the session
+
+    const unreadMessages = await Chats.countDocuments({
+      networkid: contactId,
+      receiverid: myUserId,
+      read: false,
+    });
+
+    res.json({ unreadCount: unreadMessages });
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
+
+
+const deletemessage = async (request, response) => {
+  try {
+    const { _id } = request.params;
+
+    const deletedMessage = await Chats.findByIdAndDelete(_id);
+
+    if (!deletedMessage) {
+      return response.status(404).send("Message not found");
+    }
+
+    response.status(200).send("Message deleted successfully");
+  } catch (error) {
+    console.error("Error deleting message:", error);
+    response.status(500).send(error.message);
   }
 };
 
@@ -222,4 +275,7 @@ module.exports = {
   getOnlineUsers,
   markUserOffline,
   updateuserdata,
+  editmessage,
+  deletemessage,
+  getUnreadMessages,
 };

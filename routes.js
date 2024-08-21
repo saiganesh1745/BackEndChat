@@ -13,8 +13,11 @@ router.post("/searchconnection/",usercontroller.searchconnection)
 router.post("/sendmessage",usercontroller.sendmessage)
 router.get("/viewchat/:networkId",usercontroller.viewchat)
 
-router.post("/updateseen/:_i",usercontroller.updateseen)
+router.put("/updateseen/:_id", usercontroller.updateseen);
 router.get("/connections/:searchTerm", usercontroller.connections)
+router.get("/unreadmessages/:contactId", getUnreadMessages)
 
+router.put('/editmessage', usercontroller.editmessage);
+router.delete('/deletemessage/', usercontroller.deletemessage);
 
 module.exports = router
