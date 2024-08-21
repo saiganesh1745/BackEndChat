@@ -32,7 +32,7 @@ const usersschema = new mongoose.Schema({
     },
     bio: {
         type: String,
-        default: "pk100share"
+        default: "🥵"
     },
     online: { // Field to track online status
         type: Boolean,
